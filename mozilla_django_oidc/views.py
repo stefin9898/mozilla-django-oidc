@@ -119,6 +119,7 @@ class OIDCAuthenticationCallbackView(View):
                 "request": request,
                 "nonce": nonce,
                 "code_verifier": code_verifier,
+                "idp_name": request.session.get("idp_name", None)
             }
 
             self.user = auth.authenticate(**kwargs)
@@ -167,14 +168,15 @@ class OIDCAuthenticationRequestView(View):
     def __init__(self, *args, **kwargs):
         super(OIDCAuthenticationRequestView, self).__init__(*args, **kwargs)
 
-        self.OIDC_OP_AUTH_ENDPOINT = self.get_settings("OIDC_OP_AUTHORIZATION_ENDPOINT")
-        self.OIDC_RP_CLIENT_ID = self.get_settings("OIDC_RP_CLIENT_ID")
-
     @staticmethod
     def get_settings(attr, *args):
         return import_from_settings(attr, *args)
 
     def get(self, request):
+
+        self.OIDC_OP_AUTH_ENDPOINT = self.get_settings("OIDC_OP_AUTHORIZATION_ENDPOINT")
+        self.OIDC_RP_CLIENT_ID = self.get_settings("OIDC_RP_CLIENT_ID")
+
         """OIDC client authentication initialization HTTP endpoint"""
         state = get_random_string(self.get_settings("OIDC_STATE_SIZE", 32))
         redirect_field_name = self.get_settings("OIDC_REDIRECT_FIELD_NAME", "next")
